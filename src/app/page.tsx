@@ -1,7 +1,9 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { normalizeUserSlug } from "@/lib/user-slug";
 
 export default function Home() {
   const router = useRouter();
@@ -11,20 +13,20 @@ export default function Home() {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
-  // Check if already logged in and redirect
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await authClient.getSession();
       if (data?.user) {
-        const urlSafeName = data.user.name.replace(/\s+/g, "");
+        const urlSafeName = normalizeUserSlug(data.user.name);
         router.push(`/${urlSafeName}/dashboard`);
       }
     };
-    checkSession();
+
+    void checkSession();
   }, [router]);
 
   const handleSubmit = async () => {
-    setMessage("Pracujem...");
+    setMessage("Working...");
     try {
       if (isLogin) {
         const { data, error } = await authClient.signIn.email({
@@ -32,9 +34,9 @@ export default function Home() {
           password,
         });
         if (error) {
-          setMessage(`Chyba: ${error.message}`);
+          setMessage(`Error: ${error.message}`);
         } else if (data?.user) {
-          const urlSafeName = data.user.name.replace(/\s+/g, "");
+          const urlSafeName = normalizeUserSlug(data.user.name);
           router.push(`/${urlSafeName}/dashboard`);
         }
       } else {
@@ -44,65 +46,84 @@ export default function Home() {
           name,
         });
         if (error) {
-          setMessage(`Chyba: ${error.message}`);
+          setMessage(`Error: ${error.message}`);
         } else if (data?.user) {
-          const urlSafeName = data.user.name.replace(/\s+/g, "");
+          const urlSafeName = normalizeUserSlug(data.user.name);
           router.push(`/${urlSafeName}/dashboard`);
         }
       }
-    } catch (e: unknown) {
-      setMessage(`Neočakávaná chyba.`);
+    } catch {
+      setMessage("Unexpected error.");
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-24 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50">
-      <div className="bg-white dark:bg-black p-8 rounded-xl shadow-md w-full max-w-sm flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-center">Better Auth</h1>
-        <p className="text-center text-sm text-zinc-500">
-          {isLogin ? "Prihlásenie do účtu" : "Vytvorenie nového účtu"}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 p-6 text-zinc-50 sm:p-12">
+      <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.4)] backdrop-blur">
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
+            Arcigy
+          </p>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+            Custom automation dashboard
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            Sign in to open your assigned workspace and automation modules.
+          </p>
+        </div>
+
+        <p className="mb-4 text-center text-sm text-zinc-300">
+          {isLogin ? "Log in to your account" : "Create a new account"}
         </p>
-        
+
         {!isLogin && (
-          <input 
-            type="text" 
-            placeholder="Meno" 
-            value={name} 
+          <input
+            type="text"
+            placeholder="Name"
+            value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border p-2 rounded text-black dark:text-white dark:bg-zinc-800"
+            className="mb-3 w-full rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-400/50"
           />
         )}
-        <input 
-          type="email" 
-          placeholder="E-mail" 
-          value={email} 
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 rounded text-black dark:text-white dark:bg-zinc-800"
+          className="mb-3 w-full rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-400/50"
         />
-        <input 
-          type="password" 
-          placeholder="Heslo" 
-          value={password} 
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 rounded text-black dark:text-white dark:bg-zinc-800"
+          className="w-full rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-400/50"
         />
-        
-        <button 
+
+        <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+          className="mt-5 w-full rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
         >
-          {isLogin ? "Prihlásiť sa" : "Zaregistrovať sa"}
+          {isLogin ? "Sign in" : "Sign up"}
         </button>
 
-        <button 
-          onClick={() => { setIsLogin(!isLogin); setMessage(""); }}
-          className="text-sm text-blue-500 hover:underline mt-2"
+        <button
+          onClick={() => {
+            setIsLogin(!isLogin);
+            setMessage("");
+          }}
+          className="mt-4 text-sm text-cyan-200 hover:underline"
         >
-          {isLogin ? "Nemáš účet? Zaregistruj sa." : "Už máš účet? Prihlás sa."}
+          {isLogin ? "No account yet? Register." : "Already have an account? Log in."}
         </button>
 
-        {message && <div className="mt-4 p-3 bg-zinc-100 dark:bg-zinc-800 rounded text-sm break-words">{message}</div>}
+        {message && (
+          <div className="mt-4 break-words rounded-2xl border border-white/10 bg-slate-900/70 p-3 text-sm text-slate-200">
+            {message}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
