@@ -10,6 +10,14 @@ const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+const getBaseUrl = () => {
+    let url = process.env.BETTER_AUTH_URL || "http://localhost:3000";
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = `https://${url}`;
+    }
+    return url;
+};
+
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql",
@@ -17,4 +25,5 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    baseURL: getBaseUrl(),
 });
