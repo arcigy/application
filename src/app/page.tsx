@@ -1,13 +1,27 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [isLogin, setIsLogin] = useState(false);
+  const router = useRouter();
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
+
+  // Check if already logged in and redirect
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await authClient.getSession();
+      if (data?.user) {
+        const urlSafeName = data.user.name.replace(/\s+/g, "");
+        router.push(`/${urlSafeName}/dashboard`);
+      }
+    };
+    checkSession();
+  }, [router]);
 
   const handleSubmit = async () => {
     setMessage("Pracujem...");
@@ -19,8 +33,9 @@ export default function Home() {
         });
         if (error) {
           setMessage(`Chyba: ${error.message}`);
-        } else {
-          setMessage(`Úspešné prihlásenie! Vitaj späť.`);
+        } else if (data?.user) {
+          const urlSafeName = data.user.name.replace(/\s+/g, "");
+          router.push(`/${urlSafeName}/dashboard`);
         }
       } else {
         const { data, error } = await authClient.signUp.email({
@@ -30,8 +45,9 @@ export default function Home() {
         });
         if (error) {
           setMessage(`Chyba: ${error.message}`);
-        } else {
-          setMessage(`Úspešná registrácia! Vitaj ${data?.user?.name || ""}.`);
+        } else if (data?.user) {
+          const urlSafeName = data.user.name.replace(/\s+/g, "");
+          router.push(`/${urlSafeName}/dashboard`);
         }
       }
     } catch (e: unknown) {
