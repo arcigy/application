@@ -110,7 +110,7 @@ export async function handler(rawInput: unknown): Promise<AutomationResult<Outpu
       console.log(`  🔎 Serper: "${query}"`);
 
       try {
-        const results = await serperSearchTool({ query, limit: 10 });
+        const results = await serperSearchTool({ query, limit: 100 });
 
         for (const r of results) {
           if (!r.link) continue;

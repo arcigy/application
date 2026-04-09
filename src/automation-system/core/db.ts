@@ -27,6 +27,25 @@ export async function runMigrations() {
   await sql`CREATE INDEX IF NOT EXISTS idx_logs_automation_created ON automation_logs (automation_name, created_at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_logs_status_created ON automation_logs (status, created_at DESC);`;
 
+  // 1b. Automation runs
+  await sql`
+    CREATE TABLE IF NOT EXISTS automation_runs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      automation_name TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'queued',
+      data JSONB NOT NULL DEFAULT '{}'::jsonb,
+      error TEXT,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now(),
+      started_at TIMESTAMPTZ,
+      finished_at TIMESTAMPTZ,
+      paused_at TIMESTAMPTZ,
+      cancelled_at TIMESTAMPTZ
+    );
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_runs_name_status_created ON automation_runs (automation_name, status, created_at DESC);`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_runs_updated ON automation_runs (updated_at DESC);`;
+
   // 2. Niches
   await sql`
     CREATE TABLE IF NOT EXISTS niches (
@@ -72,6 +91,7 @@ export async function runMigrations() {
       smartlead_contact_id TEXT,
       reply_status TEXT,
       reply_sentiment TEXT,
+      cold_run_id UUID,
       niche_id UUID REFERENCES niches(id),
       created_at TIMESTAMPTZ DEFAULT now(),
       updated_at TIMESTAMPTZ DEFAULT now()
