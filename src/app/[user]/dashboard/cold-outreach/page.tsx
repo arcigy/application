@@ -144,8 +144,8 @@ export default function ColdOutreachPage() {
             <select value={mode} onChange={(e) => setMode(e.target.value as any)} className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white">
               <option value="all">Spustiť všetko naraz</option>
               <option value="discovery">Iba discovery</option>
-              <option value="enrich">Discovered -> enrich</option>
-              <option value="inject">Enriched -> inject</option>
+              <option value="enrich">Discovered {"->"} enrich</option>
+              <option value="inject">Enriched {"->"} inject</option>
             </select>
             <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Keyword" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
             <input value={profession} onChange={(e) => setProfession(e.target.value)} placeholder="Profession" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />

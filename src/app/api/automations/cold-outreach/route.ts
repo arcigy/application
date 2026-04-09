@@ -52,6 +52,7 @@ export async function POST(request: Request) {
   const input = requestSchema.parse(body);
   const mode = body.mode === "discovery" || body.mode === "enrich" || body.mode === "inject" ? body.mode : "all";
   const runId = await createRun({
+    automationName: "cold-outreach",
     mode,
     keyword: input.keyword,
     profession: input.profession,
