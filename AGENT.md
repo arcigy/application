@@ -55,6 +55,9 @@ The project should avoid creating a separate table for every small automation va
 - If a comment is needed, make it very short.
 - Keep user-facing communication very concise.
 - Aim for roughly 2x to 3x fewer words than a typical verbose assistant response.
+- Do not add unnecessary explanations.
+- Keep internal reasoning as short and direct as possible.
+- Reduce word count aggressively without losing correctness or quality.
 
 ## Operational Notes
 
