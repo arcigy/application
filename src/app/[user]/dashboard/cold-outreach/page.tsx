@@ -12,6 +12,10 @@ export default function ColdOutreachPage() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [profession, setProfession] = useState("");
+  const [maxCount, setMaxCount] = useState("");
+  const [location, setLocation] = useState("");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -28,8 +32,17 @@ export default function ColdOutreachPage() {
   const runAutomation = async () => {
     setRunning(true);
     setMessage("Running...");
-    const res = await fetch("/api/automations/cold-outreach", { method: "POST" });
-    const data = await res.json();
+    const res = await fetch("/api/automations/cold-outreach", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        keyword,
+        profession,
+        maxCount: maxCount ? Number(maxCount) : undefined,
+        location: location || undefined,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
     setMessage(res.ok ? "Started" : data?.error || "Failed");
     setRunning(false);
   };
@@ -43,19 +56,27 @@ export default function ColdOutreachPage() {
           <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">cold_outreach</p>
           <h1 className="mt-3 text-3xl font-semibold">Lead discovery + enrichment</h1>
           <p className="mt-3 text-sm text-slate-300">
-            Backend flow copied from the source automation repo.
+            Set the keyword, profession, location, and max count.
           </p>
+
+          <div className="mt-6 grid gap-4">
+            <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Keyword" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
+            <input value={profession} onChange={(e) => setProfession(e.target.value)} placeholder="Profession" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
+            <input value={maxCount} onChange={(e) => setMaxCount(e.target.value)} placeholder="Max count" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
+            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
+          </div>
+
           <button
             onClick={runAutomation}
             disabled={running}
             className="mt-6 rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 disabled:opacity-60"
           >
-            {running ? "Running..." : "Run automation"}
+            {running ? "Running..." : "Start automation"}
           </button>
+
           {message && <p className="mt-4 text-sm text-slate-300">{message}</p>}
         </div>
       </div>
     </div>
   );
 }
-
