@@ -8,8 +8,8 @@ import { normalizeUserSlug } from "@/lib/user-slug";
 type Run = {
   id: string;
   status: string;
-  current_step: string;
   data: {
+    current_step?: string;
     discovered_count?: number;
     enriched_count?: number;
     sent_count?: number;
@@ -124,8 +124,8 @@ export default function ColdOutreachPage() {
 
   const nextStep = useMemo(() => {
     if (!run) return null;
-    if (run.current_step === "discovery_done") return "enrich";
-    if (run.current_step === "enrichment_done") return "inject";
+    if (run.data?.current_step === "discovery_done") return "enrich";
+    if (run.data?.current_step === "enrichment_done") return "inject";
     return null;
   }, [run]);
 
@@ -162,7 +162,7 @@ export default function ColdOutreachPage() {
           {run && (
             <div className="mt-4 grid gap-2 text-sm text-slate-300 md:grid-cols-2">
               <div>Status: <span className="text-white">{run.status}</span></div>
-              <div>Step: <span className="text-white">{run.current_step}</span></div>
+              <div>Step: <span className="text-white">{run.data?.current_step || "-"}</span></div>
               <div>Discovered: <span className="text-white">{run.data?.discovered_count ?? 0}</span></div>
               <div>Enriched: <span className="text-white">{run.data?.enriched_count ?? 0}</span></div>
               <div>Sent: <span className="text-white">{run.data?.sent_count ?? 0}</span></div>
