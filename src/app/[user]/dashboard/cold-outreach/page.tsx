@@ -10,6 +10,7 @@ type Run = {
   status: string;
   data: {
     current_step?: string;
+    discovery_total?: number;
     discovered_count?: number;
     enriched_count?: number;
     sent_count?: number;
@@ -17,6 +18,11 @@ type Run = {
     keyword?: string;
     location?: string | null;
     max_count?: number | null;
+    last_lead?: {
+      website?: string;
+      name?: string;
+      status?: string;
+    } | null;
   };
   error: string | null;
 };
@@ -129,6 +135,9 @@ export default function ColdOutreachPage() {
     return null;
   }, [run]);
 
+  const discoveryDone = run?.data?.discovered_count ?? 0;
+  const discoveryTotal = run?.data?.discovery_total ?? 0;
+
   if (loading) return <div className="min-h-screen bg-slate-950" />;
 
   return (
@@ -163,10 +172,16 @@ export default function ColdOutreachPage() {
             <div className="mt-4 grid gap-2 text-sm text-slate-300 md:grid-cols-2">
               <div>Status: <span className="text-white">{run.status}</span></div>
               <div>Step: <span className="text-white">{run.data?.current_step || "-"}</span></div>
-              <div>Discovered: <span className="text-white">{run.data?.discovered_count ?? 0}</span></div>
+              <div>Discovered: <span className="text-white">{discoveryDone}{discoveryTotal ? ` / ${discoveryTotal}` : ""}</span></div>
               <div>Enriched: <span className="text-white">{run.data?.enriched_count ?? 0}</span></div>
               <div>Sent: <span className="text-white">{run.data?.sent_count ?? 0}</span></div>
               <div>Lead count: <span className="text-white">{run.data?.lead_count ?? 0}</span></div>
+              {run.data?.last_lead && (
+                <div className="md:col-span-2 text-slate-200">
+                  Last lead: <span className="text-white">{run.data.last_lead.name || "-"}</span>
+                  {run.data.last_lead.website ? <span className="text-slate-400"> ({run.data.last_lead.website})</span> : null}
+                </div>
+              )}
               {run.error && <div className="md:col-span-2 text-rose-300">Error: {run.error}</div>}
             </div>
           )}

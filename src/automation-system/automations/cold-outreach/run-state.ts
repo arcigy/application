@@ -20,10 +20,12 @@ export async function createRun(input: {
         keyword: input.keyword,
         max_count: input.maxCount ?? null,
         location: input.location ?? null,
+        discovery_total: 0,
         discovered_count: 0,
         enriched_count: 0,
         sent_count: 0,
         lead_count: 0,
+        last_lead: null,
       })}
     )
     RETURNING id

@@ -64,6 +64,7 @@ async function insertDiscoveredLeads(runId: string, leads: any[], campaignTag: s
     await updateRun(runId, {
       discovered_count: discoveredCount,
       lead_count: discoveredCount,
+      discovery_total: leads.length,
       current_step: "discovery",
       last_lead: {
         website: lead.website,
@@ -99,11 +100,7 @@ export async function startColdOutreachWorkflow(runId: string, rawInput: Input) 
     if (!discoveryRes.success || !discoveryRes.data) throw new Error("Discovery failed.");
 
     rawLeads = discoveryRes.data.leads || [];
-    await updateRun(runId, {
-      discovered_count: 0,
-      lead_count: 0,
-      discovery_total: rawLeads.length,
-    });
+    await updateRun(runId, { discovery_total: rawLeads.length });
     await logNicheStats(niche.id, { discovered: rawLeads.length });
     await insertDiscoveredLeads(runId, rawLeads, `cold_${niche.slug}`);
 
