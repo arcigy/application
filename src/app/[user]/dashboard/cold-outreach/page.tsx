@@ -9,14 +9,15 @@ type Run = {
   id: string;
   status: string;
   current_step: string;
-  discovered_count: number;
-  enriched_count: number;
-  sent_count: number;
-  lead_count: number;
-  keyword: string;
-  profession: string;
-  location: string | null;
-  max_count: number | null;
+  data: {
+    discovered_count?: number;
+    enriched_count?: number;
+    sent_count?: number;
+    lead_count?: number;
+    keyword?: string;
+    location?: string | null;
+    max_count?: number | null;
+  };
   error: string | null;
 };
 
@@ -45,7 +46,6 @@ export default function ColdOutreachPage() {
   const [message, setMessage] = useState("");
   const [mode, setMode] = useState<"all" | "discovery" | "enrich" | "inject">("all");
   const [keyword, setKeyword] = useState("");
-  const [profession, setProfession] = useState("");
   const [maxCount, setMaxCount] = useState("");
   const [location, setLocation] = useState("");
   const [runId, setRunId] = useState("");
@@ -85,7 +85,6 @@ export default function ColdOutreachPage() {
         action: "start",
         mode,
         keyword,
-        profession,
         maxCount: maxCount ? Number(maxCount) : undefined,
         location: location || undefined,
       }),
@@ -148,7 +147,6 @@ export default function ColdOutreachPage() {
               <option value="inject">Enriched {"->"} inject</option>
             </select>
             <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Keyword" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
-            <input value={profession} onChange={(e) => setProfession(e.target.value)} placeholder="Profession" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
             <input value={maxCount} onChange={(e) => setMaxCount(e.target.value)} placeholder="Max count" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none" />
             <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white outline-none md:col-span-2" />
           </div>
@@ -165,10 +163,10 @@ export default function ColdOutreachPage() {
             <div className="mt-4 grid gap-2 text-sm text-slate-300 md:grid-cols-2">
               <div>Status: <span className="text-white">{run.status}</span></div>
               <div>Step: <span className="text-white">{run.current_step}</span></div>
-              <div>Discovered: <span className="text-white">{run.discovered_count}</span></div>
-              <div>Enriched: <span className="text-white">{run.enriched_count}</span></div>
-              <div>Sent: <span className="text-white">{run.sent_count}</span></div>
-              <div>Lead count: <span className="text-white">{run.lead_count}</span></div>
+              <div>Discovered: <span className="text-white">{run.data?.discovered_count ?? 0}</span></div>
+              <div>Enriched: <span className="text-white">{run.data?.enriched_count ?? 0}</span></div>
+              <div>Sent: <span className="text-white">{run.data?.sent_count ?? 0}</span></div>
+              <div>Lead count: <span className="text-white">{run.data?.lead_count ?? 0}</span></div>
               {run.error && <div className="md:col-span-2 text-rose-300">Error: {run.error}</div>}
             </div>
           )}

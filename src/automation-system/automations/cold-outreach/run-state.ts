@@ -6,7 +6,6 @@ export async function createRun(input: {
   automationName: string;
   mode: ColdOutreachMode;
   keyword: string;
-  profession: string;
   maxCount?: number;
   location?: string;
 }) {
@@ -19,7 +18,6 @@ export async function createRun(input: {
         mode: input.mode,
         current_step: "queued",
         keyword: input.keyword,
-        profession: input.profession,
         max_count: input.maxCount ?? null,
         location: input.location ?? null,
         discovered_count: 0,

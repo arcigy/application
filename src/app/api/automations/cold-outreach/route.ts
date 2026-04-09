@@ -6,7 +6,6 @@ import { startColdOutreachWorkflow } from "@/automation-system/automations/cold-
 
 const requestSchema = z.object({
   keyword: z.string().min(1),
-  profession: z.string().min(1),
   maxCount: z.number().int().positive().optional(),
   location: z.string().optional(),
 });
@@ -35,10 +34,9 @@ export async function POST(request: Request) {
     if (!run) return NextResponse.json({ error: "Run not found" }, { status: 404 });
     void startColdOutreachWorkflow(runId, {
       niche_slug: "cold-outreach",
-      keyword: String(run.keyword || ""),
-      profession: String(run.profession || ""),
-      max_count: run.max_count ? Number(run.max_count) : undefined,
-      location: run.location || undefined,
+      keyword: String(run.data?.keyword || ""),
+      max_count: run.data?.max_count ? Number(run.data.max_count) : undefined,
+      location: run.data?.location || undefined,
       mode: body.mode === "discovery" || body.mode === "enrich" || body.mode === "inject" ? body.mode : "all",
     }).catch(async (error: any) => {
       await setRunMeta(runId, { status: "error", error: error?.message || "Workflow failed" });
@@ -55,17 +53,15 @@ export async function POST(request: Request) {
     automationName: "cold-outreach",
     mode,
     keyword: input.keyword,
-    profession: input.profession,
     maxCount: input.maxCount,
     location: input.location,
   });
 
     void startColdOutreachWorkflow(runId, {
-    niche_slug: "cold-outreach",
-    keyword: input.keyword,
-    profession: input.profession,
-    max_count: input.maxCount,
-    location: input.location,
+      niche_slug: "cold-outreach",
+      keyword: input.keyword,
+      max_count: input.maxCount,
+      location: input.location,
     mode,
     }).catch(async (error: any) => {
       await setRunMeta(runId, { status: "error", error: error?.message || "Workflow failed" });
