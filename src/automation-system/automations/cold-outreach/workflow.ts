@@ -46,6 +46,7 @@ async function getOrCreateNiche(keyword: string) {
 }
 
 async function insertDiscoveredLeads(runId: string, leads: any[], campaignTag: string) {
+  let discoveredCount = 0;
   for (const lead of leads) {
     await sql`
       INSERT INTO leads (website, original_name, company_name_short, verification_status, verification_notes, campaign_tag, cold_run_id, updated_at)
@@ -59,6 +60,17 @@ async function insertDiscoveredLeads(runId: string, leads: any[], campaignTag: s
         campaign_tag = COALESCE(leads.campaign_tag, EXCLUDED.campaign_tag),
         updated_at = EXCLUDED.updated_at;
     `;
+    discoveredCount += 1;
+    await updateRun(runId, {
+      discovered_count: discoveredCount,
+      lead_count: discoveredCount,
+      current_step: "discovery",
+      last_lead: {
+        website: lead.website,
+        name: lead.name,
+        status: "discovered",
+      },
+    });
   }
 }
 
@@ -87,7 +99,11 @@ export async function startColdOutreachWorkflow(runId: string, rawInput: Input) 
     if (!discoveryRes.success || !discoveryRes.data) throw new Error("Discovery failed.");
 
     rawLeads = discoveryRes.data.leads || [];
-    await updateRun(runId, { discovered_count: rawLeads.length, lead_count: rawLeads.length });
+    await updateRun(runId, {
+      discovered_count: 0,
+      lead_count: 0,
+      discovery_total: rawLeads.length,
+    });
     await logNicheStats(niche.id, { discovered: rawLeads.length });
     await insertDiscoveredLeads(runId, rawLeads, `cold_${niche.slug}`);
 
