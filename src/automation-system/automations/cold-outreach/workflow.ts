@@ -107,6 +107,12 @@ export async function startColdOutreachWorkflow(runId: string, rawInput: Input) 
     await logNicheStats(niche.id, { discovered: rawLeads.length });
     await insertDiscoveredLeads(runId, rawLeads, `cold_${niche.slug}`);
 
+    if (rawLeads.length === 0) {
+      await setRunMeta(runId, { status: "finished", finished_at: true });
+      await updateRun(runId, { current_step: "done" });
+      return;
+    }
+
     if (input.mode === "discovery") {
       await setRunMeta(runId, { status: "paused", paused_at: true, finished_at: true });
       await updateRun(runId, { current_step: "discovery_done" });
