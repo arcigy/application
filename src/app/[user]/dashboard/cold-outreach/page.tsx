@@ -43,6 +43,8 @@ type LeadRow = {
   updated_at: string;
 };
 
+type ColdOutreachMode = "all" | "discovery" | "enrich" | "inject";
+
 export default function ColdOutreachPage() {
   const params = useParams();
   const router = useRouter();
@@ -50,7 +52,7 @@ export default function ColdOutreachPage() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState("");
-  const [mode, setMode] = useState<"all" | "discovery" | "enrich" | "inject">("all");
+  const [mode, setMode] = useState<ColdOutreachMode>("all");
   const [keyword, setKeyword] = useState("");
   const [maxCount, setMaxCount] = useState("");
   const [location, setLocation] = useState("");
@@ -72,11 +74,17 @@ export default function ColdOutreachPage() {
 
   useEffect(() => {
     if (!runId) return;
-    const timer = setInterval(async () => {
-      const res = await fetch(`/api/automations/cold-outreach?runId=${runId}&include=leads`);
+    const loadRun = async () => {
+      const res = await fetch(`/api/automations/cold-outreach?runId=${runId}&include=leads`, {
+        cache: "no-store",
+      });
       const data = await res.json().catch(() => ({}));
       if (data?.data?.run) setRun(data.data.run);
       if (data?.data?.leads) setLeads(data.data.leads);
+    };
+    void loadRun();
+    const timer = setInterval(() => {
+      void loadRun();
     }, 2000);
     return () => clearInterval(timer);
   }, [runId]);
@@ -105,7 +113,7 @@ export default function ColdOutreachPage() {
     setRunning(false);
   };
 
-  const continueRun = async (nextMode: "discovery" | "enrich" | "inject") => {
+  const continueRun = async (nextMode: Exclude<ColdOutreachMode, "all">) => {
     if (!runId) return;
     setRunning(true);
     const res = await fetch("/api/automations/cold-outreach", {
@@ -149,7 +157,7 @@ export default function ColdOutreachPage() {
           <p className="mt-3 text-sm text-slate-300">Spusť celý flow naraz alebo iba jednotlivé kroky, sleduj priebežné dopĺňanie leadov v tabuľke.</p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <select value={mode} onChange={(e) => setMode(e.target.value as any)} className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white">
+            <select value={mode} onChange={(e) => setMode(e.target.value as ColdOutreachMode)} className="rounded-xl border border-white/10 bg-slate-950/60 p-3 text-white">
               <option value="all">Spustiť všetko naraz</option>
               <option value="discovery">Iba discovery</option>
               <option value="enrich">Discovered {"->"} enrich</option>
